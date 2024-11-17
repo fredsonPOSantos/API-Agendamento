@@ -5,6 +5,8 @@ const router = express.Router();
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const moment = require('moment-timezone');
+
 
 require('dotenv').config(); // Certifique-se de carregar as variáveis de ambiente
 
@@ -46,17 +48,17 @@ router.post('/', authMiddleware, async (req, res) => {
                 return res.status(400).json({ message: 'Você já tem um agendamento futuro. Cancele ou remarque o atual antes de agendar outro.' });
             }
         }
-
+        const adjustedDateTime = moment.tz(dateTime, 'America/Sao_Paulo').utc().format();
         const appointment = new Appointment({
             username, // Usa o nome de usuário selecionado no frontend
             author: author || 'administrador', // Define o autor como "administrador"
             serviceType,
-            dateTime,
+            dateTime: adjustedDateTime,
             status: 'scheduled',
         });
 
-        await appointment.save();
-        const message = `Novo agendamento confirmado:\nUsuário: ${username}\nServiço: ${serviceType}\nData e Hora: ${new Date(dateTime).toLocaleString()}`;
+        await appointment.save();        
+        const message = `Novo agendamento confirmado:\nUsuário: ${username}\nServiço: ${serviceType}\nData e Hora: ${moment(adjustedDateTime).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}h`;        
         await sendWhatsAppMessage(message);
         res.status(201).json({ message: 'Agendamento criado com sucesso' });
     } catch (error) {
