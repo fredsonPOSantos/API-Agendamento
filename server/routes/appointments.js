@@ -117,6 +117,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
         if (!isAdmin(user) && appointment.username !== user.username) {
             return res.status(403).json({ message: 'Acesso negado' });
         }
+        const adjustedDateTime = moment.tz(dateTime, 'America/Sao_Paulo').utc().format();
 
         // Atualiza o agendamento
         const updatedAppointment = await Appointment.findByIdAndUpdate(
@@ -126,7 +127,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
         );
 
         // Enviar notificação via WhatsApp para o administrador
-        const message = `O agendamento de ${user.username} foi remarcado:\nNovo Serviço: ${serviceType}\nNova Data e Hora: ${new Date(dateTime).toLocaleString()}`;
+        const message = `O agendamento de ${user.username} foi remarcado:\nNovo Serviço: ${serviceType}\nNova Data e Hora: ${moment(adjustedDateTime).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}h`;        
         await sendWhatsAppMessage(message);
 
         console.log('Agendamento atualizado:', updatedAppointment);
