@@ -122,7 +122,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
         // Atualiza o agendamento
         const updatedAppointment = await Appointment.findByIdAndUpdate(
             req.params.id,
-            { serviceType, dateTime },
+            {serviceType, dateTime: adjustedDateTime},
             { new: true }
         );
 
