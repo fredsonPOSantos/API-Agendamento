@@ -1,4 +1,4 @@
-// /server/routes/appointments.js
+
 // Importações
 const express = require('express');
 const router = express.Router();
@@ -6,7 +6,6 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const moment = require('moment-timezone');
-
 
 require('dotenv').config(); // Certifique-se de carregar as variáveis de ambiente
 
@@ -100,6 +99,22 @@ router.get('/users', async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar usuários:', error);
         res.status(500).json({ message: 'Erro ao buscar usuários' });
+    }
+});
+//Rota para buscar usuario pelo username "teste"
+router.get('/users/:username', async (req, res) => {
+    try {
+        const { username } = req.params; // Obtém o parâmetro username da URL
+        const user = await User.findOne({ username: username }, 'username'); // Busca o usuário pelo nome
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        res.status(500).json({ message: 'Erro ao buscar usuário' });
     }
 });
 
